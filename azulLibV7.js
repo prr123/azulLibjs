@@ -605,24 +605,61 @@ addAzulFooter(footerObj) {
         styleSheet.insertRule('* { margin: 0; padding: 0; font-family: Calibri; list-style: none; text-decoration:none; font-size: 20pt;}', rulenum);
 //      	let rulenum2 = styleSheet.cssRules.length;
 //      console.log('rules2: ' + rulenum2);
+		this.styleSheet = styleSheet;
     }
 
 	renderJsonObj(rendObj) {
 		const parent = this.docmain;
 		const elNum = rendObj.elements.length;
+		const doc = rendObj.doc;
+		const cssRuleNum = rendObj.cssRules.length;
+
 //		console.log('render: ' + parent.id + ' els: ' + elNum);
 		while (parent.firstChild) {
     		parent.firstChild.remove();
 		}
 
+
+		this.docName = doc.docNam;
+		for (let i=0; i<cssRuleNum; i++) {
+			let cssRuleObj = rendObj.cssRules[i].cssRule;
+			this.styleSheet.insertRule(cssRuleObj);
+		}
+
+//			let elObj = rendObj.elements[0];
+//			this.renderEl(elObj, false);
+
 		for (let i=0; i<elNum; i++) {
 			let elObj = rendObj.elements[i];
-			elObj.parent = this.docmain;
-			this.addElement(elObj);
+			this.renderEl(elObj, true);
 
 		}
 
+		parent.appendChild(this.gdocMain);
 	}
+
+
+	renderEl(elObj) {
+//      console.log('elObj: ', + elObj);
+		if (elObj.typ === undefined) {return}
+        let el = document.createElement(elObj.typ);
+        Object.assign(el,elObj);
+		if (Object.hasOwn(elObj, 'style')) {Object.assign(el.style,elObj.style);}
+
+		if (elObj.parent !== undefined) {this[elObj.parent].appendChild(el);}
+		this[elObj.name] = el;
+
+		if (Object.hasOwn(elObj, 'click')) {
+			el.addEventListener('mouseup', (event) => {this.getFile(event)});
+		}
+
+		if (Object.hasOwn(elObj, 'hovStyle')) {
+			el.addEventListener('mouseenter', (event) => {Object.assign(el.style,elObj.hovStyle);});
+			el.addEventListener('mouseleave', (event) => {Object.assign(el.style,elObj.style);});
+		}
+        return el;
+	}
+
 
     addButton(butObj) {
         let butEl = document.createElement('button');
