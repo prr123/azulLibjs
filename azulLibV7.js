@@ -601,12 +601,17 @@ addAzulFooter(footerObj) {
         document.head.appendChild(styleEl);
 
         let styleSheet = styleEl.sheet;
-        let rulenum = styleSheet.cssRules.length;
-        styleSheet.insertRule('* { margin: 0; padding: 0; font-family: Calibri; list-style: none; text-decoration:none; font-size: 20pt;}', rulenum);
-//      	let rulenum2 = styleSheet.cssRules.length;
-//      console.log('rules2: ' + rulenum2);
+        styleSheet.insertRule('* { margin: 0; padding: 0; font-family: Calibri; list-style: none; text-decoration:none;}');
 		this.styleSheet = styleSheet;
     }
+
+    addCssRule(cssRuleObj) {
+		let styleSheet = styleEl.sheet;
+		for (let i=0; i<cssRuleObj.cssRules.length; i++) {
+			let cssRule = cssRuleObj.cssRules[i]
+    	    styleSheet.insertRule(cssRule);
+		}
+	}
 
 	renderJsonObj(rendObj) {
 		const parent = this.docmain;
