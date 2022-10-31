@@ -606,7 +606,7 @@ addAzulFooter(footerObj) {
     }
 
     addCssRule(cssRuleObj) {
-		let styleSheet = styleEl.sheet;
+		let styleSheet = this.styleSheet;
 		for (let i=0; i<cssRuleObj.cssRules.length; i++) {
 			let cssRule = cssRuleObj.cssRules[i]
     	    styleSheet.insertRule(cssRule);
@@ -637,7 +637,6 @@ addAzulFooter(footerObj) {
 		for (let i=0; i<elNum; i++) {
 			let elObj = rendObj.elements[i];
 			this.renderEl(elObj, true);
-
 		}
 
 		parent.appendChild(this.gdocMain);
@@ -670,52 +669,72 @@ addAzulFooter(footerObj) {
         let butEl = document.createElement('button');
         Object.assign(butEl,butObj);
         Object.assign(butEl.style,butObj.style);
-//      butEl.style = butObj.style;
-        butEl.state = true;
-        butEl.hovAtts = Object.keys(butObj.hovStyl);
-        butEl.addEventListener('mouseover',(event)=>{butElHov(event);});
-        butEl.addEventListener('mouseleave',(event)=>{butElLeave(event, butEl);});
-        butEl.addEventListener('click',(event)=>{butElClick(event);});
-//      butEl.addEventListener('click',(event)=>{butObj.click(event,butObj.p1);});
+
+        butEl.state = null;
+
+		if (Object.hasOwn(butObj, 'hovStyle')) {
+        	butEl.oldStyle = {};
+			let keys = Object.keys(butEl.hovStyle)
+            for (let i=0; i<keys.length; i++) {
+                let prop = keys[i];
+                butEl.oldStyle[prop] = butEl.style[prop];
+			}
+
+    	    butEl.addEventListener('mouseover',(event)=>{butElHov(event, butEl);});
+        	butEl.addEventListener('mouseleave',(event)=>{butElLeave(event, butEl);});
+
+		}
+        butEl.addEventListener('click',(event)=>{butElClick(event, butEl);});
         butObj.parent.appendChild(butEl);
         return butEl;
 
-        function  butElHov(e) {
-//  console.log('butEl hovering');
-            for (let i=0; i<e.target.hovAtts.length; i++) {
-                let prop = e.target.hovAtts[i];
-//              console.log('keys: ' + prop + '\n');
-                e.target.style[prop] = butObj.hovStyl[prop];
+        function  butElHov(e, butEl) {
+			let keys = Object.keys(butEl.hovStyle)
+            for (let i=0; i<keys.length; i++) {
+                let prop = keys[i];
+                butEl.style[prop] = butEl.hovStyle[prop];
             }
-            e.target.style.cursor = 'pointer';
+            butEl.style.cursor = 'pointer';
         }
 
-        function  butElLeave(e, el) {
+        function  butElLeave(e, butEl) {
 //  console.log('butEl leaving');
-//        Object.assign(el.style,butObj.style);
-
-            for (let i=0; i<e.target.hovAtts.length; i++) {
-                let prop = e.target.hovAtts[i];
-                if (e.target.state) {
-                    e.target.style[prop] = butObj.style[prop];
-                } else {
-                    e.target.style[prop] = butObj.altStyl[prop];
-                }
+			let keys = Object.keys(butEl.hovStyle)
+            for (let i=0; i<keys.length; i++) {
+                let prop = keys[i];
+				if (butEl.state != null) {
+	                if (e.target.state) {
+    	                butEl.style[prop] = butEl.oldStyle[prop];
+        	        } else {
+            	        butEl.style[prop] = butEl.altStyle[prop];
+                	}
+				} else {
+                   	butEl.style[prop] = butEl.oldStyle[prop];
+				}
             }
-            el.style.cursor = 'default';
+            butEl.style.cursor = 'default';
 
         }
 
-        function  butElClick(e) {
-            e.target.state = !e.target.state;
-            for (let i=0; i<e.target.hovAtts.length; i++) {
-                let prop = e.target.hovAtts[i];
-                if (e.target.state) {
-                    e.target.style[prop] = butObj.style[prop];
-                } else {
-                    e.target.style[prop] = butObj.altStyl[prop];
-                }
+        function  butElClick(e, butEl) {
+ 			e.preventDefault();
+			if (butEl.state !== null) {butEl.state = !butEl.state;}
+
+			let keys = Object.keys(butEl.hovStyle)
+            for (let i=0; i<keys.length; i++) {
+                let prop = butEl.hovStyle[i];
+				if (butEl.state !== null) {
+                	if (butEl.state) {
+                    	butEl.style[prop] = butEl.oldStyle[prop];
+                	} else {
+                    	butEl.style[prop] = butEl.altStyl[prop];
+                	}
+				} else {
+                    	butEl.style[prop] = butEl.oldStyle[prop];
+				}
             }
+  			const payload = new FormData(formA);
+			console.log('button clicked! payload: ' + payload);
         } //butelclick
 
    } //button
