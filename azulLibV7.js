@@ -535,20 +535,54 @@ addAzulFooter(footerObj) {
 			this[elObj.name] = el;
 		}
 
-		if (Object.hasOwn(elObj, 'click')) {
-			el.addEventListener('mouseup', (event) => {this.getFile(event)});
+		if (Object.hasOwn(elObj, 'file')) {
+			el.addEventListener('mouseup', (event) => {this.getFile(event, elObj)});
 		}
 
 		if (Object.hasOwn(elObj, 'hovStyle')) {
 			el.addEventListener('mouseenter', (event) => {Object.assign(el.style,elObj.hovStyle);});
 			el.addEventListener('mouseleave', (event) => {Object.assign(el.style,elObj.style);});
 		}
+
+		if (elObj.typ === 'input') {
+//			console.log(elObj.id + ' input!')
+			if (el.focusStyle != undefined) {
+	        	el.blurStyle = {};
+				el.oldPh = el.placeholder;
+//				Object.assign(el.blurStyle, el.focusStyle);
+				let keys = Object.keys(el.focusStyle)
+        	    for (let i=0; i<keys.length; i++) {
+                	let prop = keys[i];
+                	el.blurStyle[prop] = el.style[prop];
+				}
+				el.addEventListener('focus', (event) => {focInp(event,el);});
+				el.addEventListener('blur', (event) => {blurInp(event,el);});
+//			el.addEventListener('focus', (event, el) => {event.preventDefault(); el.placeholder=""; Object.assign(el.style,elObj.focusStyle);});
+//			el.addEventListener('blur', (event, el) => {el.placeholder= elObj.placeholder; Object.assign(el.style,elObj.style);});
+			}
+		}
         return el;
+
+		function focInp(ev, el) {
+			ev.preventDefault();
+			el.placeholder="";
+			Object.assign(el.style,el.focusStyle);
+			el.label.style.visibility = 'visible';
+			return;
+		}
+
+		function blurInp(ev, el) {
+			ev.preventDefault();
+			el.placeholder= el.oldPh;
+			Object.assign(el.style,el.blurStyle);
+			el.label.style.visibility = 'hidden';
+			return;
+		}
 	}
 
-	getFile(e) {
+	getFile(e, el) {
 //		console.log('file: ' + e.target.file);
-		fetchDataAsync('test.json').then((respObj) => {
+		fetchDataAsync(el.file).then((respObj) => {
 			this.renderJsonObj(respObj);
 		});
 	}
@@ -679,11 +713,10 @@ addAzulFooter(footerObj) {
                 let prop = keys[i];
                 butEl.oldStyle[prop] = butEl.style[prop];
 			}
-
     	    butEl.addEventListener('mouseover',(event)=>{butElHov(event, butEl);});
         	butEl.addEventListener('mouseleave',(event)=>{butElLeave(event, butEl);});
-
 		}
+
         butEl.addEventListener('click',(event)=>{butElClick(event, butEl);});
         butObj.parent.appendChild(butEl);
         return butEl;
