@@ -540,8 +540,16 @@ addAzulFooter(footerObj) {
 		}
 
 		if (Object.hasOwn(elObj, 'hovStyle')) {
-			el.addEventListener('mouseenter', (event) => {Object.assign(el.style,elObj.hovStyle);});
-			el.addEventListener('mouseleave', (event) => {Object.assign(el.style,elObj.style);});
+			el.baseStyle = {};
+			let keys = Object.keys(el.hovStyle)
+       	    for (let i=0; i<keys.length; i++) {
+                let prop = keys[i];
+                el.baseStyle[prop] = el.style[prop];
+			}
+
+
+			el.addEventListener('mouseenter', (event) => {moEnt(event, el);});
+			el.addEventListener('mouseleave', (event) => {moLev(event, el);});
 		}
 
 		if (elObj.typ === 'input') {
@@ -563,6 +571,18 @@ addAzulFooter(footerObj) {
 		}
         return el;
 
+		function moEnt(ev, el) {
+			ev.preventDefault();
+			Object.assign(el.style,el.hovStyle);
+			return;
+		}
+
+		function moLev(ev, el) {
+			ev.preventDefault();
+			Object.assign(el.style,el.baseStyle);
+			return;
+		}
+
 		function focInp(ev, el) {
 			ev.preventDefault();
 			el.placeholder="";
@@ -578,6 +598,7 @@ addAzulFooter(footerObj) {
 			el.label.style.visibility = 'hidden';
 			return;
 		}
+
 	}
 
 	getFile(e, el) {
@@ -902,7 +923,7 @@ addAzulFooter(footerObj) {
     } // labinp
 
 
-	addInpsel(inpSelObj) {
+	addSelect(inpSelObj) {
         let inpSelEl = document.createElement('select');
         Object.assign(inpSelEl,inpSelObj);
         Object.assign(inpSelEl.style,inpSelObj.style);
@@ -984,10 +1005,8 @@ addAzulFooter(footerObj) {
 
     Object.assign(svgEl,iconObj);
     Object.assign(svgEl.style,iconObj.svgStyle);
+//xx
 
-    svgEl.addEventListener('mouseover',(event)=>{svgElHov(event);});
-    svgEl.addEventListener('mouseleave',(event)=>{svgElHovLeave(event, svgEl);});
-    svgEl.state = false;
 	svgEl.iconType = iconObj.iconType;
 
     let pathEl = document.createElementNS(this.svgNS,'path');
@@ -999,7 +1018,6 @@ addAzulFooter(footerObj) {
     Object.assign(pathEl.style,iconObj.style);
     switch (iconObj.iconType) {
         case 'login':
-//          pathEl.setAttribute('d', 'M 50,40 A 15,15 0 0 1 50,10 A 15,15 0 0 1 50,40 M 21,98 A 28,49 0 0 1 50,50 28,49 0 0 1 78,98 Z');
             pathEl.setAttribute('d', 'M 50,40 A 15,15 0 0 1 50,10 A 15,15 0 0 1 50,40 M 22,90 A 28,49 0 0 1 50,50 28,49 0 0 1 78,90 60,60 90 0 1 22,90');
 			svgEl.addEventListener('click',(event)=>{svgLoginClick(event, this.login);});
             break;
@@ -1023,34 +1041,59 @@ addAzulFooter(footerObj) {
 		case 'eye':
 			pathEl.setAttribute('d', 'M 0,40 A 100,100 0 0 1 100,40 m 0, 20 A 100,100 0 0 1 0,60 M 38,50 A 12,12 0 0 1 62,50 A 12,12 0 0 1 38,50');
 			break;
+		case 'pencil':
+   			pathEl.setAttribute('d','M 16.5,71.5 0,96 24,80 26,82 14,70 82,0 96,12 26,82 M 67,15 81,27 M 72,10 86,22 M 77,5 91,17');
+			break;
+		case 'bin':
+			pathEl.setAttribute('d','M 20,18 30,96 h40 L80,18 M 50,90 50,25 M 40,90 35,25 M 60,90 65,25 M 15,15 h70 M 20,15 20,10 H80 L80,15 M 43,10 V5 H57 V10');
+			break;
         default:
           throw 'unknown icon: ' + iconObj.icon;
     }
-    let hovKeys = Object.keys(iconObj.hovStyle);
+
+	if (Object.hasOwn(iconObj, 'hovStyle')) {
+    	pathEl.state = false;
+		pathEl.baseStyle = {};
+		let keys = Object.keys(iconObj.hovStyle);
+		pathEl.hovStyle = iconObj.hovStyle;
+		for (let i=0; i<keys.length; i++) {
+			let prop = keys[i];
+			pathEl.baseStyle[prop] = pathEl.style[prop];
+		}
+    	svgEl.addEventListener('mouseenter',(event)=>{svgElHov(event, pathEl);});
+    	svgEl.addEventListener('mouseleave',(event)=>{svgElHovLeave(event, pathEl);});
+    	pathEl.addEventListener('mouseenter',(event)=>{svgElHov(event, pathEl);});
+    	pathEl.addEventListener('mouseleave',(event)=>{svgElHovLeave(event, pathEl);});
+	}
 
     svgEl.appendChild(pathEl);
     iconObj.parent.appendChild(svgEl);
 
-    function svgElHov(e) {
-        if (e.target.state) { return}
+	return svgEl;
+
+    function svgElHov(e, pathEl) {
+        if (pathEl.state) { return}
         e.preventDefault();
         e.target.style.cursor = 'pointer';
-        for (let i=0; i<hovKeys.length; i++) {
-            let prop = hovKeys[i];
-            pathEl.style[prop] = iconObj.hovStyle[prop];
+		let keys = Object.keys(pathEl.hovStyle)
+        for (let i=0; i<keys.length; i++) {
+            let prop = keys[i];
+            pathEl.style[prop] = pathEl.hovStyle[prop];
         }
-        e.target.state = true;
+        pathEl.state = true;
 //        console.log('hover');
     }
 
-    function svgElHovLeave(e, el) {
+    function svgElHovLeave(e, pathEl) {
+        if (!(pathEl.state)) { return}
         e.preventDefault();
         e.target.style.cursor = 'default';
-        for (let i=0; i<hovKeys.length; i++) {
-            let prop = hovKeys[i];
-            pathEl.style[prop] = iconObj.style[prop];
+		let keys = Object.keys(pathEl.hovStyle)
+        for (let i=0; i<keys.length; i++) {
+            let prop = keys[i];
+            pathEl.style[prop] = pathEl.baseStyle[prop];
         }
-        el.state = false;
+        pathEl.state = false;
 //        console.log('leaving');
     }
 
