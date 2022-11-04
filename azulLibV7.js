@@ -539,6 +539,13 @@ addAzulFooter(footerObj) {
 			el.addEventListener('mouseup', (event) => {this.getFile(event, elObj)});
 		}
 
+		if (Object.hasOwn(elObj, 'clickFun')) {
+			if (elObj.clickFun != null) {
+				el.addEventListener('mouseup', (event) => {moUp(event,el)});
+//				console.log('el click');
+			}
+		}
+
 		if (Object.hasOwn(elObj, 'hovStyle')) {
 			el.baseStyle = {};
 			let keys = Object.keys(el.hovStyle)
@@ -598,6 +605,13 @@ addAzulFooter(footerObj) {
 			el.label.style.visibility = 'hidden';
 			return;
 		}
+
+    	function moUp(e, el) {
+	        e.preventDefault();
+//    	    console.log('el click');
+			el.clickFun(el.textContent);
+    	}
+
 
 	}
 
@@ -788,7 +802,7 @@ addAzulFooter(footerObj) {
 				}
             }
   			const payload = new FormData(formA);
-			console.log('button clicked! payload: ' + payload);
+//			console.log('button clicked! payload: ' + payload);
         } //butelclick
 
    } //button
@@ -812,7 +826,7 @@ addAzulFooter(footerObj) {
 
         function keyUpFun(e) {
             e.preventDefault();
-            console.log('key up: '+ e.key);
+//            console.log('key up: '+ e.key);
             if (e.key == 'Enter') {
 //                console.log('key enter: ' + e.target.value);
             }
@@ -949,7 +963,7 @@ addAzulFooter(footerObj) {
 
         function inpSelKeyUp(e) {
             e.preventDefault();
-            console.log('inpSel key up: '+ e.key);
+//            console.log('inpSel key up: '+ e.key);
             if (e.key == 'Enter') {
 //                console.log('key enter: ' + e.target.value);
             }
@@ -1005,7 +1019,6 @@ addAzulFooter(footerObj) {
 
     Object.assign(svgEl,iconObj);
     Object.assign(svgEl.style,iconObj.svgStyle);
-//xx
 
 	svgEl.iconType = iconObj.iconType;
 
@@ -1034,9 +1047,11 @@ addAzulFooter(footerObj) {
             break;
 		case 'right':
 			pathEl.setAttribute('d', 'M 5,5 95,50 5,95 Z');
+			svgEl.addEventListener('click',(event)=>{svgRightClick(event, svgEl);});
 			break;
 		case 'left':
 			pathEl.setAttribute('d', 'M 95,5 5,50 95,95 Z');
+			svgEl.addEventListener('click',(event)=>{svgLeftClick(event, svgEl);});
 			break;
 		case 'eye':
 			pathEl.setAttribute('d', 'M 0,40 A 100,100 0 0 1 100,40 m 0, 20 A 100,100 0 0 1 0,60 M 38,50 A 12,12 0 0 1 62,50 A 12,12 0 0 1 38,50');
@@ -1097,9 +1112,20 @@ addAzulFooter(footerObj) {
 //        console.log('leaving');
     }
 
+    function svgRightClick(e, el) {
+        e.preventDefault();
+//        console.log('right click: ' + el.iconType);
+		el.clickFun();
+    }
+
+    function svgLeftClick(e, el) {
+        e.preventDefault();
+//        console.log('left click: ' + el.iconType);
+		el.clickFun();
+    }
     function svgElClick(e) {
         e.preventDefault();
-        console.log('click: ' + this.iconType);
+        console.log('click: ' + e.target.iconType);
     }
 
     function svgMenuClick(e, menu) {
