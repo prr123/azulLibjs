@@ -854,14 +854,14 @@ class HtmlPage {
 		if (Object.hasOwn(txtInpObj,'style')) {
 			txtInpObj.style.borderWidth = 0;
 			txtInpObj.style.outlineStyle = 'none';
-			txtInpObk.style.borderBottom = '1px solid black';
+			txtInpObj.style.borderBottom = '1px solid black';
 		} else {
 			txtInpObj.style = inpStylMdObj;
 		}
 		if (Object.hasOwn(txtInpObj,'focusStyle')) {
 			txtInpObj.focusStyle.borderWidth = 0;
 			txtInpObj.focusStyle.outlineStyle = 'none';
-			txtInpObk.focusStyle.borderBottom = '2px solid blue';
+			txtInpObj.focusStyle.borderBottom = '2px solid blue';
 		} else {
     		txtInpObj.focusStyle = inpStylFocMdObj;
 		}
@@ -999,6 +999,40 @@ class HtmlPage {
 	} // inpsel
 
 	addMdSelect(inpSelObj) {
+	// sample linpSelObj:
+
+		let labelObj = {
+    	    typ: 'label',
+        	style: {textAlign: 'start', display: 'block', visibility: 'visible', fontSize: '12pt', color: 'blue'},
+    	};
+
+    	labelObj.parent = inpSelObj.parent;
+    	labelObj.textContent =  inpSelObj.labName;
+    	const lab = this.addElement(labelObj);
+
+        let inpStylMdObj = {
+            display: 'block',
+            margin: '0 0 1em 0',
+            fontSize: '16pt',
+            width: '300px',
+            height: '1em',
+            padding: '0.2em',
+            borderWidth: '0',
+            outline: 'none',
+            borderBottom: '1px solid black',
+        };
+
+        let inpStylFocMdObj = {
+            borderWidth: '0',
+            outline: 'none',
+            borderBottom: '2px solid blue',
+        };
+
+//        txtInpObj.parent = txtInpObj.parent;
+        inpSelObj.label = lab;
+        inpSelObj.placeholder = inpSelObj.labName;
+        inpSelObj.typ = 'select';
+
         let inpSelEl = document.createElement('select');
         Object.assign(inpSelEl,inpSelObj);
         Object.assign(inpSelEl.style,inpSelObj.style);
@@ -1009,6 +1043,28 @@ class HtmlPage {
 			inpSelEl.add(opt);
 		}
 
+        inpSelObj.label = lab;
+        inpSelObj.placeholder = inpSelObj.labName;
+        inpSelObj.typ = 'input';
+        inpSelObj.type = 'text';
+        if (Object.hasOwn(txtInpObj,'style')) {
+            inpSelObj.style.borderWidth = 0;
+            inpSelObj.style.outlineStyle = 'none';
+            inpSelObj.style.borderBottom = '1px solid black';
+        } else {
+            inpSelObj.style = inpStylMdObj;
+        }
+        if (Object.hasOwn(inpSelObj,'focusStyle')) {
+            inpSelObj.focusStyle.borderWidth = 0;
+            inpSelObj.focusStyle.outlineStyle = 'none';
+            inpSelObj.focusStyle.borderBottom = '2px solid blue';
+        } else {
+            inpSelObj.focusStyle = inpStylFocMdObj;
+        }
+        const inp = this.addElement(txtInpObj);
+        inp.label = lab;
+
+
 //        inpSelEl.addEventListener('input',(event) => {inpFun(event)});
         inpSelEl.addEventListener('mouseup',(event) => {inpSelMup(event)});
 //        inpSelEl.addEventListener('keydown',(event) => {inpSelKeyDown(event)});
@@ -1016,6 +1072,7 @@ class HtmlPage {
         inpSelObj.parent.appendChild(inpSelEl);
 
 		return inpSelEl;
+	}
 
 	addCheckBox(inpSelObj) {
         let inpSelEl = document.createElement('select');
@@ -1029,13 +1086,18 @@ class HtmlPage {
 		}
 
 //        inpSelEl.addEventListener('input',(event) => {inpFun(event)});
-        inpSelEl.addEventListener('mouseup',(event) => {inpSelMup(event)});
+        inpSelEl.addEventListener('mouseup',(event) => {inpSelMup(event, inpSelEl)});
 //        inpSelEl.addEventListener('keydown',(event) => {inpSelKeyDown(event)});
 //        inpSelEl.addEventListener('keyup',(event) => {inpSelKeyUp(event)});
         inpSelObj.parent.appendChild(inpSelEl);
 
 		return inpSelEl;
 
+		function inpSelNup(event, el) {
+
+		}
+
+	}
 
 	createIcon(iconObj) {
     	let svgEl = document.createElementNS(this.svgNS, 'svg');
