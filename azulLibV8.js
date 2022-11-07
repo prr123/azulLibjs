@@ -1099,6 +1099,50 @@ class HtmlPage {
 
 	}
 
+	addFlexRow(flexRowObj) {
+		let flexObjStyl = {
+			display: 'flex',
+			flexDirection: 'row',
+			flexWrap: 'no-wrap',
+			justifyContent: 'space-between',
+		}
+
+		flexObj.parent = flexRowObj.parent;
+		flexObj.typ = 'div';
+		Object.assign(flexObjStyl, flexRowObj.style)
+
+		let divEl = this.addElement(flexObj);
+		return divEl;
+	}
+
+	addFlexRow3Div(flexRowObj) {
+		let flexObjStyl = {
+			display: 'flex',
+			flexDirection: 'row',
+			flexWrap: 'no-wrap',
+			justifyContent: 'space-between',
+		}
+
+//		flexObj.parent = flexRowObj.parent;
+//		flexObj.parent = null;
+		Object.assign(flexObjStyl, flexRowObj.style)
+		flexObj.typ = 'div';
+		flexObj.style = flexObjStyl;
+
+		let divEl = this.addElement(flexObj);
+
+        let divL = document.createElement('div');
+        let divM = document.createElement('div');
+        let divR = document.createElement('div');
+		divEl.divL = divL;
+		divEl.divM = divM;
+		divEl.divR = divR;
+
+		flexRowObj.parent.appendChild(divEl);
+		return divEl;
+	}
+
+
 	createIcon(iconObj) {
     	let svgEl = document.createElementNS(this.svgNS, 'svg');
     	if (iconObj['size'] === undefined) {
