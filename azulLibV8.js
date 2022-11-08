@@ -490,7 +490,7 @@ class HtmlPage {
 		return footer;
 	} // addazul footer
 
-
+//xxx
 	addElement(elObj) {
 //      console.log('elObj: ', + elObj);
 		if (elObj.typ === undefined) {return}
@@ -554,8 +554,6 @@ class HtmlPage {
 				}
 				el.addEventListener('focus', (event) => {focInp(event,el);});
 				el.addEventListener('blur', (event) => {blurInp(event,el);});
-//			el.addEventListener('focus', (event, el) => {event.preventDefault(); el.placeholder=""; Object.assign(el.style,elObj.focusStyle);});
-//			el.addEventListener('blur', (event, el) => {el.placeholder= elObj.placeholder; Object.assign(el.style,elObj.style);});
 			}
 		}
         return el;
@@ -569,22 +567,6 @@ class HtmlPage {
 		function moLev(ev, el) {
 			ev.preventDefault();
 			Object.assign(el.style,el.baseStyle);
-			return;
-		}
-
-		function focInp(ev, el) {
-			ev.preventDefault();
-			el.placeholder="";
-			Object.assign(el.style,el.focusStyle);
-			el.label.style.visibility = 'visible';
-			return;
-		}
-
-		function blurInp(ev, el) {
-			ev.preventDefault();
-			el.placeholder= el.oldPh;
-			Object.assign(el.style,el.blurStyle);
-			el.label.style.visibility = 'hidden';
 			return;
 		}
 
@@ -846,29 +828,82 @@ class HtmlPage {
         	borderBottom: '2px solid blue',
     	};
 
-	    txtInpObj.parent = txtInpObj.parent;
-    	txtInpObj.label = lab;
-    	txtInpObj.placeholder = txtInpObj.labName;
-		txtInpObj.typ = 'input';
-		txtInpObj.type = 'text';
+        const inp = document.createElement('input');
+		inp.type = 'text';
+		inp.placeholder = txtInpObj.labName;
+		inp.label = lab;
+
 		if (Object.hasOwn(txtInpObj,'style')) {
-			txtInpObj.style.borderWidth = 0;
-			txtInpObj.style.outlineStyle = 'none';
-			txtInpObj.style.borderBottom = '1px solid black';
+			Object.assign(inp.style, txtInpObj.style);
+			inp.style.borderWidth = 0;
+			inp.style.outlineStyle = 'none';
+			inp.style.borderBottom = '1px solid black';
 		} else {
-			txtInpObj.style = inpStylMdObj;
+			Object.assign(inp.style, inpStylMdObj);
 		}
 		if (Object.hasOwn(txtInpObj,'focusStyle')) {
-			txtInpObj.focusStyle.borderWidth = 0;
-			txtInpObj.focusStyle.outlineStyle = 'none';
-			txtInpObj.focusStyle.borderBottom = '2px solid blue';
+			Object.asign(inp.focusStyle, txtInpObj.focusStyle);
+			inp.focusStyle.borderWidth = 0;
+			inp.focusStyle.outlineStyle = 'none';
+			inp.focusStyle.borderBottom = '2px solid blue';
 		} else {
-    		txtInpObj.focusStyle = inpStylFocMdObj;
+    		inp.focusStyle = inpStylFocMdObj;
 		}
-    	const inp = this.addElement(txtInpObj);
-		inp.label = lab;
+//    	const inp = this.addElement(txtInpObj);
+
+		inp.blurStyle = {};
+		inp.oldPh = inp.placeholder;
+
+		let keys = Object.keys(inp.focusStyle)
+       	for (let i=0; i<keys.length; i++) {
+			let prop = keys[i];
+			inp.blurStyle[prop] = inp.style[prop];
+		}
+
+		inp.Change = false;
+		inp.addEventListener('focus', (event) => {focInp(event, inp);});
+		inp.addEventListener('blur', (event) => {blurInp(event, inp);});
+
+		inp.addEventListener('input', (event) => {inpFun(event, inp);});
+		inp.addEventListener('keyup', (event) => {keyUpFun(event, inp);});
+
+
+		let filledInp = txtInpObj.input;
+
+		txtInpObj.parent.appendChild(inp);
 		return inp;
-	}
+
+		function focInp(ev, el) {
+			ev.preventDefault();
+			el.placeholder="";
+			Object.assign(el.style,el.focusStyle);
+			el.label.style.visibility = 'visible';
+			inp.Change = false;
+			return;
+		}
+
+		function blurInp(ev, el) {
+			ev.preventDefault();
+			el.placeholder= el.oldPh;
+			Object.assign(el.style,el.blurStyle);
+			el.label.style.visibility = 'hidden';
+			if (inp.change) {filledInp(el.value);inp.Change = false;}
+			return;
+		}
+
+		function inpFun(ev, el) {
+			el.inpChange = true;
+		}
+
+        function keyUpFun(e, el) {
+            e.preventDefault();
+            if (e.key == 'Enter') {
+				filledInp(el.value);
+            }
+			return;
+        }
+
+	} //addMdtxtInp
 
     addInput(inpObj) {
         let inpEl = document.createElement('input');
@@ -876,10 +911,15 @@ class HtmlPage {
         Object.assign(inpEl.style,inpObj.style);
 //        inpEl.addEventListener('input',(event) => {inpFun(event)});
         inpEl.addEventListener('click',(event) => {inpClickFun(event)});
+        inpEl.addEventListener('input',(event) => {inpDoneFun(event, inpEl)});
         inpEl.addEventListener('keydown',(event) => {keyDownFun(event)});
         inpEl.addEventListener('keyup',(event) => {keyUpFun(event)});
         inpObj.parent.appendChild(inpEl);
         return inpEl;
+
+        function inpDoneFun(e, el) {
+
+		}
 
         function inpClickFun(e) {
             e.preventDefault();
@@ -998,12 +1038,13 @@ class HtmlPage {
 
 	} // inpsel
 
+
 	addMdSelect(inpSelObj) {
 	// sample linpSelObj:
 
 		let labelObj = {
     	    typ: 'label',
-        	style: {textAlign: 'start', display: 'block', visibility: 'visible', fontSize: '12pt', color: 'blue'},
+        	style: {textAlign: 'start', display: 'block', visibility: 'visible', fontSize: '12pt', color: 'black'},
     	};
 
     	labelObj.parent = inpSelObj.parent;
@@ -1033,21 +1074,7 @@ class HtmlPage {
         inpSelObj.placeholder = inpSelObj.labName;
         inpSelObj.typ = 'select';
 
-        let inpSelEl = document.createElement('select');
-        Object.assign(inpSelEl,inpSelObj);
-        Object.assign(inpSelEl.style,inpSelObj.style);
-		let options = inpSelObj.selOptions;
-		for (let i=0;i<options.length; i++) {
-			let opt = document.createElement("option");
-			opt.text = options[i];
-			inpSelEl.add(opt);
-		}
-
-        inpSelObj.label = lab;
-        inpSelObj.placeholder = inpSelObj.labName;
-        inpSelObj.typ = 'input';
-        inpSelObj.type = 'text';
-        if (Object.hasOwn(txtInpObj,'style')) {
+        if (Object.hasOwn(inpSelObj,'style')) {
             inpSelObj.style.borderWidth = 0;
             inpSelObj.style.outlineStyle = 'none';
             inpSelObj.style.borderBottom = '1px solid black';
@@ -1061,18 +1088,186 @@ class HtmlPage {
         } else {
             inpSelObj.focusStyle = inpStylFocMdObj;
         }
-        const inp = this.addElement(txtInpObj);
-        inp.label = lab;
 
+        let inpSelEl = document.createElement('select');
+        Object.assign(inpSelEl,inpSelObj);
+        Object.assign(inpSelEl.style,inpSelObj.style);
+		let options = inpSelObj.selOptions;
+		for (let i=0;i<options.length; i++) {
+			let opt = document.createElement("option");
+			opt.text = options[i];
+			inpSelEl.add(opt);
+		}
 
-//        inpSelEl.addEventListener('input',(event) => {inpFun(event)});
-        inpSelEl.addEventListener('mouseup',(event) => {inpSelMup(event)});
-//        inpSelEl.addEventListener('keydown',(event) => {inpSelKeyDown(event)});
-//        inpSelEl.addEventListener('keyup',(event) => {inpSelKeyUp(event)});
+		inpSelEl.sel = false;
+        inpSelEl.addEventListener('mouseup',(event) => {inpSelMup(event, inpSelEl)});
+        inpSelEl.parent.addEventListener('mouseup',(event) => {inpParSelMup(event, inpSelEl)});
+//        inpSelEl.addEventListener('input',(event) => {inpSelInpEv(event, inpSelEl)});
         inpSelObj.parent.appendChild(inpSelEl);
 
 		return inpSelEl;
+
+		function inpParSelMup(event, el) {
+			if (event.target == el.parent) {
+				if (el.sel) {
+					el.sel = false;
+					el.style.borderBottom = '1px solid black';
+					el.label.style.color = 'black'
+				}
+				return;
+			}
+		}
+
+		function inpSelMup(event, el) {
+			event.stopPropagation();
+			if (el.sel) {
+				el.sel = false;
+				el.style.borderBottom = '1px solid black';
+				el.label.style.color = 'black'
+			} else {
+				el.label.style.color = 'blue'
+				el.style.borderBottom = '3px solid blue';
+				el.sel = true;
+			}
+		}
+
+		function inpSelInpEv(event, el) {
+		}
 	}
+
+
+	addMdAltSel(inpSelObj) {
+		let labelObj = {
+    	    typ: 'label',
+        	style: {textAlign: 'start', display: 'block', visibility: 'hidden', fontSize: '12pt', color: 'blue'},
+    	};
+
+    	labelObj.parent = inpSelObj.parent;
+    	labelObj.textContent =  inpSelObj.labName;
+    	const lab = this.addElement(labelObj);
+
+    	let inpStylMdObj = {
+        	display: 'block',
+        	margin: '0 0 1em 0',
+        	fontSize: '16pt',
+        	width: '300px',
+        	height: '1em',
+        	padding: '0.2em',
+        	borderWidth: '0',
+        	outline: 'none',
+        	borderBottom: '1px solid black',
+    	};
+
+    	let inpStylFocMdObj = {
+        	borderWidth: '0',
+        	outline: 'none',
+        	borderBottom: '2px solid blue',
+    	};
+
+        const inp = document.createElement('input');
+		inp.type = 'text';
+		inp.placeholder = inpSelObj.labName;
+		inp.label = lab;
+//
+		inp.selOpt = inpSelObj.selOptions;
+
+		if (Object.hasOwn(inpSelObj,'style')) {
+			Object.assign(inp.style, inpSelObj.style);
+			inp.style.borderWidth = 0;
+			inp.style.outlineStyle = 'none';
+			inp.style.borderBottom = '1px solid black';
+		} else {
+			Object.assign(inp.style, inpStylMdObj);
+		}
+		if (Object.hasOwn(inpSelObj,'focusStyle')) {
+			Object.asign(inp.focusStyle, inpSelObj.focusStyle);
+			inp.focusStyle.borderWidth = 0;
+			inp.focusStyle.outlineStyle = 'none';
+			inp.focusStyle.borderBottom = '2px solid blue';
+		} else {
+    		inp.focusStyle = inpStylFocMdObj;
+		}
+//    	const inp = this.addElement(inpSelObj);
+
+		inp.blurStyle = {};
+		inp.oldPh = inp.placeholder;
+
+		let keys = Object.keys(inp.focusStyle)
+       	for (let i=0; i<keys.length; i++) {
+			let prop = keys[i];
+			inp.blurStyle[prop] = inp.style[prop];
+		}
+
+		inp.Change = false;
+		inp.addEventListener('focus', (event) => {focInp(event, inp);});
+		inp.addEventListener('blur', (event) => {blurInp(event, inp);});
+
+		inp.addEventListener('input', (event) => {inpFun(event, inp);});
+		inp.addEventListener('keyup', (event) => {keyUpFun(event, inp);});
+
+
+		let filledInp = inpSelObj.input;
+
+		inpSelObj.parent.appendChild(inp);
+
+		// select division
+        let optDiv = document.createElement('div');
+        let optDivHd = document.createElement('h3');
+		const optDivHdStyl = {minHeight: '30px', backgroundColor: 'blue',color: 'white', width: inp.style.width, padding: '10px 5px',};
+		Object.assign(optDivHd.style, optDivHdStyl);
+		optDivHd.textContent = 'options:';
+		optDiv.appendChild(optDivHd);
+        let selDiv = document.createElement('div');
+		Object.assign(selDiv.style, {border:'1px dotted red', minHeight: '40px', width:inp.style.width, padding: '10px 5px',});
+
+		let opt = [];
+		for (let i=0; i< inp.selOpt.length; i++) {
+        	opt.push(document.createElement('p'));
+			opt[i].textContent = inp.selOpt[i];
+			Object.assign(opt[i].style, {margin: '5px 0', fontSize: '20pt',});
+			opt[i].addEventListener('mouseenter', (ev)=>{opt[i].style.background = 'blue'; opt[i].style.color='white';});
+			opt[i].addEventListener('mouseleave', (ev)=>{opt[i].style.background = 'white'; opt[i].style.color='black';});
+			opt[i].addEventListener('mouseup', (ev)=>{inp.value = inp.selOpt[i];});
+
+			selDiv.appendChild(opt[i]);
+		}
+
+		optDiv.appendChild(selDiv);
+		inpSelObj.parent.appendChild(optDiv);
+
+		return inp;
+
+		function focInp(ev, el) {
+			ev.preventDefault();
+			el.placeholder="";
+			Object.assign(el.style,el.focusStyle);
+			el.label.style.visibility = 'visible';
+			inp.Change = false;
+			return;
+		}
+
+		function blurInp(ev, el) {
+			ev.preventDefault();
+			el.placeholder= el.oldPh;
+			Object.assign(el.style,el.blurStyle);
+			el.label.style.visibility = 'hidden';
+			if (inp.change) {filledInp(el.value);inp.Change = false;}
+			return;
+		}
+
+		function inpFun(ev, el) {
+			el.inpChange = true;
+		}
+
+        function keyUpFun(e, el) {
+            e.preventDefault();
+            if (e.key == 'Enter') {
+				filledInp(el.value);
+            }
+			return;
+        }
+
+	} //addaltMdtxtInp
 
 	addCheckBox(inpSelObj) {
         let inpSelEl = document.createElement('select');
@@ -1087,15 +1282,10 @@ class HtmlPage {
 
 //        inpSelEl.addEventListener('input',(event) => {inpFun(event)});
         inpSelEl.addEventListener('mouseup',(event) => {inpSelMup(event, inpSelEl)});
-//        inpSelEl.addEventListener('keydown',(event) => {inpSelKeyDown(event)});
-//        inpSelEl.addEventListener('keyup',(event) => {inpSelKeyUp(event)});
         inpSelObj.parent.appendChild(inpSelEl);
 
 		return inpSelEl;
 
-		function inpSelNup(event, el) {
-
-		}
 
 	}
 
@@ -1203,6 +1393,9 @@ class HtmlPage {
 		case 'cal':
 			pathEl.setAttribute('d','M 10,15 V85 A 5,5 0 0 0 15,90 H85 A 5,5 0 0 0 90,85 V15 H10 M 10,16 H90 M 10,17 H90 M 10,18 H90 M 10,19 H90 M 25,15 v-3 h5 v3 M 70,15 v-3 h5 v3 M 20,35 v-3 h3 v3 h-3');
         	break;
+		case 'cart':
+			pathEl.setAttribute('d','M 5,40 25,80 h50 L120,10 h5 M 25,90 A 5,5 0 1 0 30,85 A 5,5 0 0 0 25,90 M 65,90 A 5,5 0 1 0 70,85 A 5,5 0 0 0 65,90');
+			break;
 		default:
           throw 'unknown icon: ' + iconObj.icon;
     	}
