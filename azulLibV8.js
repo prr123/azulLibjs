@@ -861,11 +861,11 @@ class HtmlPage {
 		}
 
 		inp.Change = false;
-		inp.addEventListener('focus', (event) => {focInp(event, inp);});
-		inp.addEventListener('blur', (event) => {blurInp(event, inp);});
+		inp.addEventListener('focus', (event) => {inpMdFocInp(event, inp);});
+		inp.addEventListener('blur', (event) => {inpMdBlurInp(event, inp);});
 
-		inp.addEventListener('input', (event) => {inpFun(event, inp);});
-		inp.addEventListener('keyup', (event) => {keyUpFun(event, inp);});
+		inp.addEventListener('input', (event) => {inpMdFun(event, inp);});
+		inp.addEventListener('keyup', (event) => {inpMdKeyUpFun(event, inp);});
 
 
 		let filledInp = txtInpObj.input;
@@ -873,7 +873,7 @@ class HtmlPage {
 		txtInpObj.parent.appendChild(inp);
 		return inp;
 
-		function focInp(ev, el) {
+		function inpMdFocInp(ev, el) {
 			ev.preventDefault();
 			el.placeholder="";
 			Object.assign(el.style,el.focusStyle);
@@ -882,7 +882,7 @@ class HtmlPage {
 			return;
 		}
 
-		function blurInp(ev, el) {
+		function inpMdBlurInp(ev, el) {
 			ev.preventDefault();
 			el.placeholder= el.oldPh;
 			Object.assign(el.style,el.blurStyle);
@@ -891,11 +891,11 @@ class HtmlPage {
 			return;
 		}
 
-		function inpFun(ev, el) {
+		function inpMdFun(ev, el) {
 			el.inpChange = true;
 		}
 
-        function keyUpFun(e, el) {
+        function inpMdKeyUpFun(e, el) {
             e.preventDefault();
             if (e.key == 'Enter') {
 				filledInp(el.value);
@@ -912,8 +912,8 @@ class HtmlPage {
 //        inpEl.addEventListener('input',(event) => {inpFun(event)});
         inpEl.addEventListener('click',(event) => {inpClickFun(event)});
         inpEl.addEventListener('input',(event) => {inpDoneFun(event, inpEl)});
-        inpEl.addEventListener('keydown',(event) => {keyDownFun(event)});
-        inpEl.addEventListener('keyup',(event) => {keyUpFun(event)});
+        inpEl.addEventListener('keydown',(event) => {inpKeyDownFun(event)});
+        inpEl.addEventListener('keyup',(event) => {inpKeyUpFun(event)});
         inpObj.parent.appendChild(inpEl);
         return inpEl;
 
@@ -926,7 +926,7 @@ class HtmlPage {
 //            console.log('input click: ' + e.target.value);
         }
 
-        function keyUpFun(e) {
+        function inpKeyUpFun(e) {
             e.preventDefault();
 //            console.log('key up: '+ e.key);
             if (e.key == 'Enter') {
@@ -934,7 +934,7 @@ class HtmlPage {
             }
         }
 
-        function keyDownFun(e) {
+        function inpKeyDownFun(e) {
             let key = e.key;
             let el = e.target;
             let ctrlkey = e.ctrlKey;
@@ -981,20 +981,20 @@ class HtmlPage {
 			inpSelEl.add(opt);
 		}
 
-//        inpSelEl.addEventListener('input',(event) => {inpFun(event)});
-        inpSelEl.addEventListener('mouseup',(event) => {inpSelMup(event)});
-//        inpSelEl.addEventListener('keydown',(event) => {inpSelKeyDown(event)});
-//        inpSelEl.addEventListener('keyup',(event) => {inpSelKeyUp(event)});
+//        inpSelEl.addEventListener('input',(event) => {selFun(event)});
+        inpSelEl.addEventListener('mouseup',(event) => {selMup(event)});
+//        inpSelEl.addEventListener('keydown',(event) => {selKeyDown(event)});
+//        inpSelEl.addEventListener('keyup',(event) => {selKeyUp(event)});
         inpSelObj.parent.appendChild(inpSelEl);
 
 		return inpSelEl;
 
-        function inpSelMup(e) {
+        function selMup(e) {
             e.preventDefault();
 //            console.log('inpSel mouse up: ' + e.target.value);
         }
 
-        function inpSelKeyUp(e) {
+        function selKeyUp(e) {
             e.preventDefault();
 //            console.log('inpSel key up: '+ e.key);
             if (e.key == 'Enter') {
@@ -1002,7 +1002,7 @@ class HtmlPage {
             }
         }
 
-        function inpSelKeyDown(e) {
+        function selKeyDown(e) {
             let key = e.key;
             let el = e.target;
             let ctrlkey = e.ctrlKey;
@@ -1107,7 +1107,7 @@ class HtmlPage {
 
 		return inpSelEl;
 
-		function inpParSelMup(event, el) {
+		function inpSelMup(event, el) {
 			if (event.target == el.parent) {
 				if (el.sel) {
 					el.sel = false;
@@ -1118,7 +1118,7 @@ class HtmlPage {
 			}
 		}
 
-		function inpSelMup(event, el) {
+		function inpParSelMup(event, el) {
 			event.stopPropagation();
 			if (el.sel) {
 				el.sel = false;
@@ -1199,20 +1199,24 @@ class HtmlPage {
 		}
 
 		inp.Change = false;
-		inp.addEventListener('focus', (event) => {focInp(event, inp);});
-		inp.addEventListener('blur', (event) => {blurInp(event, inp);});
-
-		inp.addEventListener('input', (event) => {inpFun(event, inp);});
-		inp.addEventListener('keyup', (event) => {keyUpFun(event, inp);});
-
 
 		let filledInp = inpSelObj.input;
 
+		inp.addEventListener('focus', (event) => {selAltFocInp(event, inp);});
+//		inp.addEventListener('blur', (event) => {selAltBlurInp(event, inp);});
+
+//		inp.addEventListener('input', (event) => {selAltInpFun(event, inp);});
+//		inp.addEventListener('keyup', (event) => {selAltInpKeyUpFun(event, inp);});
+
 		inpSelObj.parent.appendChild(inp);
+
 
 		// select division
         let optDiv = document.createElement('div');
+		inp.optDiv = optDiv;
+		optDiv.style.display = 'none';
         let optDivHd = document.createElement('h3');
+		optDivHd.addEventListener('mouseup', (ev) => {selAltOptHdMupFun(ev, inp);});
 		const optDivHdStyl = {minHeight: '30px', backgroundColor: 'blue',color: 'white', width: inp.style.width, padding: '10px 5px',};
 		Object.assign(optDivHd.style, optDivHdStyl);
 		optDivHd.textContent = 'options:';
@@ -1222,44 +1226,71 @@ class HtmlPage {
 
 		let opt = [];
 		for (let i=0; i< inp.selOpt.length; i++) {
-        	opt.push(document.createElement('p'));
+        	opt[i] = document.createElement('p');
 			opt[i].textContent = inp.selOpt[i];
 			Object.assign(opt[i].style, {margin: '5px 0', fontSize: '20pt',});
 			opt[i].addEventListener('mouseenter', (ev)=>{opt[i].style.background = 'blue'; opt[i].style.color='white';});
 			opt[i].addEventListener('mouseleave', (ev)=>{opt[i].style.background = 'white'; opt[i].style.color='black';});
-			opt[i].addEventListener('mouseup', (ev)=>{inp.value = inp.selOpt[i];});
-
+			opt[i].addEventListener('mouseup', (ev)=>{selAltOptMupFun(ev,inp, opt[i]);});
 			selDiv.appendChild(opt[i]);
 		}
 
 		optDiv.appendChild(selDiv);
+
 		inpSelObj.parent.appendChild(optDiv);
 
 		return inp;
 
-		function focInp(ev, el) {
+		function selAltOptHdMupFun(ev, inp) {
+			inp.optDiv.style.display = 'none';
+			Object.assign(inp.style,inp.blurStyle);
+			inp.label.style.visibility = 'hidden';
+			inp.change=false;
+		}
+
+		function selAltOptMupFun(ev, inp, optEl) {
+
+			if (inp.value != optEl.textContent) {
+//				inp.change = true;
+				inp.value = optEl.textContent;
+				filledInp(inp.value);
+				inp.change = false;
+			}
+			inp.optDiv.style.display = 'none';
+			Object.assign(inp.style,inp.blurStyle);
+			inp.label.style.visibility = 'hidden';
+//			if (inp.change) {filledInp(inp.value);inp.change = false;}
+		}
+
+		function selAltFocInp(ev, el) {
 			ev.preventDefault();
 			el.placeholder="";
 			Object.assign(el.style,el.focusStyle);
 			el.label.style.visibility = 'visible';
-			inp.Change = false;
+			el.optDiv.style.display = 'block';
+			inp.change = false;
 			return;
 		}
 
-		function blurInp(ev, el) {
+		function selAltBlurInp(ev, el) {
 			ev.preventDefault();
 			el.placeholder= el.oldPh;
 			Object.assign(el.style,el.blurStyle);
 			el.label.style.visibility = 'hidden';
-			if (inp.change) {filledInp(el.value);inp.Change = false;}
+ 			el.optDiv.style.display = 'none';
+//console.log('inpfun: ' + el.value);
+			if (el.change) {filledInp(el.value);inp.Change = false;}
 			return;
 		}
 
-		function inpFun(ev, el) {
+		function selAltInpFun(ev, el) {
+console.log('inpfun: ' + el.value);
+ 			el.optDiv.style.display = 'none';
 			el.inpChange = true;
 		}
 
-        function keyUpFun(e, el) {
+        function selAltKeyUpFun(e, el) {
+console.log('inpKeyUpfun: ' + el.value);
             e.preventDefault();
             if (e.key == 'Enter') {
 				filledInp(el.value);
